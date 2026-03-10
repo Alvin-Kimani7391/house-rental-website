@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Register | HouseFinder</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<section class="register-section">
+    <form id="registerForm">
+        <h2>Create Account</h2>
+
+        <input type="text" id="fullname" placeholder="Full Name" required>
+        <input type="email" id="email" placeholder="Email Address" required>
+        
+        
+        <select id="role" required>
+            <option value="">Register as...</option>
+            <option value="user">User</option>
+            <option value="agent">Agent</option>
+            <option value="owner">Owner</option>
+        </select>
+
+       
+    <div class="password-wrapper">
+        <input type="password" id="password" placeholder="Password" required>
+        <span class="toggle-password">Show</span>
+    </div>
+
+    <div class="password-wrapper">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+        <span class="toggle-password">Show</span>
+    </div>
+        <button type="submit">Register</button>
+
+        <div class="register-extra">
+            <p>Already have an account? <a href="login.html">Login</a></p>
+        </div>
+    </form>
+</section>
+
+<script src="js/register.js"></script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HouseFinder | Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="https://kit.fontawesome.com/e1426ab85b.js" crossorigin="anonymous"></script>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar">
+        <div class="logo">🏠 HouseFinder</div>
+
+        <ul class="nav-links">
+            <li><a href="index2.html" class="active">Home</a></li>
+            <li id="addListingLink"><a href="add.html">Add Listing</a></li>
+            <li><a href="#" id="logoutBtn">Logout</a></li>
+        </ul>
+
+        <div class="user-info" id="userInfo">
+  <!-- Username and badge will be injected here via JS -->
+</div>
+        <div class="menu-toggle" id="mobile-menu">
+            ☰
+        </div>
+    </nav>
+
+    <!-- ================= HERO SECTION ================= -->
+    <section class="hero">
+        <h1>Welcome to HouseFinder!</h1>
+        <p>Search from verified agents and house owners</p>
+
+        <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search by city..." autocomplete="off">
+    <button id="searchBtn">Search</button>
+    <ul id="suggestions" class="suggestions-list"></ul>
+</div>
+    </section>
+
+    <!-- ================= HOUSE LISTINGS ================= -->
+    <section class="listings">
+        <button id="geoBtn" class="floating-location-btn">
+    
+    <i class="fa-solid fa-location-crosshairs fa-xl" style="color: rgb(255, 255, 255);"></i>Get Nearby Houses
+</button>
+        <div class="houses-container" id="houseContainer">
+            <!-- Dynamic house cards will load here -->
+        </div>
+    </section>
+
+
+    <!-- ================= pagination ================= -->
+    <div class="houses-container" id="houseContainer"></div>
+
+<div class="pagination" id="pagination"></div>
+
+    <!-- ================= FOOTER ================= -->
+        <!-- ================= FOOTER ================= -->
+<footer class="footer">
+
+<div class="footer-container">
+
+    <!-- Brand -->
+    <div class="footer-col">
+        <h3>🏠 HouseFinder</h3>
+        <p>
+            Find verified vacant houses from trusted agents and property owners.
+            Making house hunting simple and stress-free.
+        </p>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+            <li><a href="index2.html">Home</a></li>
+            <li><a href="add.html">Add Listing</a></li>
+            <li><a href="#">Browse Houses</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </div>
+
+    <!-- Categories -->
+    <div class="footer-col">
+    <h4>Property Types</h4>
+    <ul>
+        <li><button  class="property-filter" data-search="studio">Studios</button></li>
+        <li><button  class="property-filter" data-search="one bedroom">One Bedrooms</button></li>
+        <li><button  class="property-filter" data-search="bedsitter">Bedsitters</button></li>
+        <li><button  class="property-filter" data-search="airbnb">AirBnB</button></li>
+    </ul>
+</div>
+
+    <!-- Newsletter -->
+    <div class="footer-col">
+        <h4>Subscribe</h4>
+        <p>Get alerts when new houses are listed.</p>
+
+        <div class="newsletter">
+            <input type="email" placeholder="Enter email">
+            <button>Join</button>
+        </div>
+
+        <div class="socials" id="icons">
+            <a href="https://www.facebook.com/share/1GkdidaAiP/"><i class="fa-brands fa-facebook-f fa-xl "   style="color: #ffffff;"></i></a>
+                        <a href="https://wa.me/254715418492"><i class="fa-brands fa-whatsapp fa-xl" style="color: #ffffff;"></i></a>
+                <a href="https://vm.tiktok.com/ZMHTmxytY9hkR-cyBwf/"><i class="fa-brands fa-tiktok fa-xl" style="color: #f8f6f6;"></i></a>
+                <a href="https://www.instagram.com/zakayowathiari?igsh=MWdiYmFjMHdiZGF2Mw==" target="_blank"><i class="fa-brands fa-instagram fa-xl" style="color: #ffffff;"></i></a>
+                <a href="https://x.com/zackzionsu81654?t=WZZB9CX79pPlQ2BK34V9lg&s=09" target="_blank"><i class="fa-brands fa-square-x-twitter fa-xl" style="color: #fafafa;"></i></a>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer-bottom">
+    <p>© <span id="year"></span> HouseFinder • All rights reserved</p>
+</div>
+
+</footer>
+
+    <!-- ================= JS ================= -->
+    <script src="js/main.js"></script>
+
+    
+    <script>
+    const userInfo = document.getElementById('userInfo');
+    const addListingLink = document.getElementById('addListingLink');
+
+    const userName = localStorage.getItem('userName');
+    const userRole = localStorage.getItem('role');
+
+    if (userName) {
+
+        // Create badge span dynamically
+        const badge = document.createElement('span');
+        badge.classList.add('role-badge');
+
+        // Assign role-specific class
+        switch (userRole) {
+            case 'admin':
+                badge.classList.add('admin');
+                break;
+            case 'agent':
+                badge.classList.add('agent');
+                break;
+            case 'owner':
+                badge.classList.add('owner');
+                break;
+            default:
+                badge.classList.add('user');
+        }
+
+        badge.textContent = userRole ? userRole : 'user';
+
+        // Inject username + badge
+        if (userInfo) {
+            userInfo.textContent = `Hi, ${userName} `;
+            userInfo.appendChild(badge);
+        }
+
+        // Hide "Add Listing" for normal users
+        if (userRole !== 'agent' && userRole !== 'owner') {
+            if (addListingLink) addListingLink.style.display = 'none';
+        }
+
+    } else {
+        window.location.href = 'login.html';
+    }
+
+    // Logout
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('role');
+            window.location.href = 'login.html';
+        });
+    }
+</script>
+</body>
+</html>

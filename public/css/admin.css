@@ -1,0 +1,191 @@
+/* ================= BODY ================= */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    color: #333;
+}
+
+/* ================= CONTAINER ================= */
+.admin-container {
+    padding: 30px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* ================= LOGOUT BUTTON ================= */
+button#logoutBtn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #e74c3c;
+    color: white;
+    float: right;
+    margin-bottom: 20px;
+    transition: 0.3s;
+}
+
+button#logoutBtn:hover {
+    background: #c0392b;
+}
+
+/* ================= CARDS ================= */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.card {
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.card h3 {
+    margin: 0 0 10px;
+    font-size: 1.2rem;
+}
+
+.card p {
+    font-size: 28px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* ================= CARD COLORS ================= */
+#usersCard {
+    background: #f59e0b;
+    color: white;
+}
+#agentsCard {
+    background: linear-gradient(135deg, #00b894, #019875);
+    color: white;
+}
+#ownersCard {
+    background: linear-gradient(135deg, #1e90ff, #3da0ff);
+    color: white;
+}
+#housesCard {
+    background: #6c5ce7;
+    color: white;
+}
+
+/* ================= DATA TABLE ================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+}
+
+th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background: #f1f3f6;
+    font-weight: 600;
+    text-align: left;
+}
+
+td {
+    vertical-align: middle;
+}
+
+/* ================= STATUS TAGS ================= */
+.status {
+    padding: 4px 10px;
+    border-radius: 6px;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status.available { background: #2ecc71; }
+.status.booked { background: #e67e22; }
+.status.rented { background: #e74c3c; }
+
+/* ================= HEADINGS ================= */
+h1, h2 {
+    margin-bottom: 20px;
+}
+
+/* ================= DATA SECTION ================= */
+#dataSection {
+    margin-top: 20px;
+}
+
+/* ================= LOGOUT BUTTON ================= */
+#logoutBtn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff4b2b, #ff416c);
+    color: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    float: right;
+    margin-bottom: 20px;
+}
+
+#logoutBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+}
+
+#logoutBtn:active {
+    transform: translateY(0px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+
+/* Delete button in table */
+.delete-btn {
+    padding: 5px 10px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+.login-section{
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
+                url('https://images.unsplash.com/photo-1560518883-ce09059eeffa');
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+}

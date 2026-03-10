@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>House Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">🏠 HouseFinder</div>
+
+        <ul class="nav-links">
+            <li><a href="index2.html" >Home</a></li>
+            <li id="addListingLink"><a href="add.html">Add Listing</a></li>
+            <li id="houseExplorationLink" ><a href="#" class="active">Explore House</a></li>
+        </ul>
+
+        <div class="user-info" id="userInfo">
+  <!-- Username and badge will be injected here via JS -->
+</div>
+        <div class="menu-toggle" id="mobile-menu">
+            ☰
+        </div>
+    </nav>
+
+    <!-- HOUSE DETAILS SECTION -->
+    <section class="house-details" id="houseDetails">
+        <!-- JS will load house details here -->
+    </section>
+    
+    <script src="js/house.js"></script>
+
+    <script>
+    const userInfo = document.getElementById('userInfo');
+    const addListingLink = document.getElementById('addListingLink');
+
+    const userName = localStorage.getItem('userName');
+    const userRole = localStorage.getItem('role');
+
+    if (userName) {
+
+        // Create badge span dynamically
+        const badge = document.createElement('span');
+        badge.classList.add('role-badge');
+
+        // Assign role-specific class
+        switch (userRole) {
+            case 'admin':
+                badge.classList.add('admin');
+                break;
+            case 'agent':
+                badge.classList.add('agent');
+                break;
+            case 'owner':
+                badge.classList.add('owner');
+                break;
+            default:
+                badge.classList.add('user');
+        }
+
+        badge.textContent = userRole ? userRole : 'user';
+
+        // Inject username + badge
+        if (userInfo) {
+            userInfo.textContent = `Hi, ${userName} `;
+            userInfo.appendChild(badge);
+        }
+
+        // Hide "Add Listing" for normal users
+        if (userRole !== 'agent' && userRole !== 'owner') {
+            if (addListingLink) addListingLink.style.display = 'none';
+        }
+
+    } else {
+        window.location.href = 'login.html';
+    }
+
+    // Logout
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('role');
+            window.location.href = 'login.html';
+        });
+    }
+</script>
+
+</body>
+</html>
