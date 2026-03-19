@@ -1,16 +1,27 @@
 // ================== middleware/upload.js ==================
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('../config/cloudinary');
+const { cloudinary } = require('../config/cloudinary');
 
-const storage = new CloudinaryStorage({
+// Generic storage function
+const createCloudinaryStorage = (folderName) => new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
-    folder: 'house-listings',
-    resource_type: 'auto' // handles both images & videos
-  })
+    folder: folderName,
+    resource_type: 'auto', // images & videos
+  }),
 });
 
-const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } }); // 50MB max
+// Profile image upload middleware
+const uploadProfile = multer({
+  storage: createCloudinaryStorage('profile-images'),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max for profile
+});
 
-module.exports = upload;
+// House/listing upload middleware
+const uploadListing = multer({
+  storage: createCloudinaryStorage('house-listings'),
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max for listings
+});
+
+module.exports = { uploadProfile, uploadListing };

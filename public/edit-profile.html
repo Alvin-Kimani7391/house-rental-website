@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Profile</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+/* ======= PAGE STYLES ======= */
+body { font-family: 'Poppins', sans-serif; background:#f5f6fa; margin:0; padding:0; }
+.container { max-width: 800px; margin: 50px auto; background:white; padding:30px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,0.1); }
+h2 { color:#2d3436; }
+label { display:block; margin-top:15px; font-weight:600; }
+input, textarea { width:100%; padding:10px; margin-top:5px; border-radius:8px; border:1px solid #ccc; }
+textarea { resize:none; }
+button { margin-top:20px; padding:10px 20px; border:none; border-radius:8px; background:#0984e3; color:white; font-weight:600; cursor:pointer; }
+button:disabled { background:#b2bec3; cursor:not-allowed; }
+
+/* Avatar preview */
+.avatar-container { text-align:center; margin-bottom:20px; position:relative; }
+#previewImage { width:140px; height:140px; border-radius:50%; object-fit:cover; border:5px solid #fff; box-shadow:0 5px 15px rgba(0,0,0,0.1); }
+
+/* Progress bar */
+.progress-container { width:100%; height:8px; background:#eee; border-radius:10px; overflow:hidden; margin-top:10px; }
+#progressBar { height:100%; width:0%; background:#00b894; transition: width 0.3s ease; }
+
+/* Toast notifications */
+.toast { position:fixed; top:20px; right:20px; background:#2d3436; color:white; padding:12px 20px; border-radius:8px; opacity:0; transition:0.3s; z-index:1000; }
+.toast.show { opacity:1; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Edit Profile</h2>
+
+    <div class="avatar-container">
+        <img id="previewImage" src="/images/default-avatar.png" alt="Profile Image">
+        <input type="file" id="imageInput" accept="image/*" style="margin-top:10px;">
+        <div class="progress-container">
+            <div id="progressBar"></div>
+        </div>
+    </div>
+
+    <label for="name">Name</label>
+    <input type="text" id="name">
+
+    <label for="phone">Phone</label>
+    <input type="text" id="phone">
+
+    <label for="location">Location</label>
+    <input type="text" id="location">
+
+    <label for="bio">Bio</label>
+    <textarea id="bio" rows="4"></textarea>
+
+    <button id="saveBtn">Save Changes</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/edit-profile.js"></script>
+</body>
+</html>

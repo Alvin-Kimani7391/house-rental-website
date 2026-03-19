@@ -1,5 +1,15 @@
+
+
+
+
 // ================== main.js ==================
 document.addEventListener('DOMContentLoaded', () => {
+
+
+
+
+
+    
     const container = document.getElementById("houseContainer");
     const searchInput = document.getElementById("searchInput");
     const searchBtn = document.getElementById("searchBtn");
@@ -12,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let houses = [];          // All houses fetched
     let filteredHouses = [];  // Houses filtered by search/nearby
     let activeSuggestion = -1;
+
+
+    
 
     // ================== NEARBY LABEL ==================
     const nearbyLabel = document.createElement("h2");
@@ -303,6 +316,12 @@ if (Array.isArray(nearbyHouses) && nearbyHouses.length > 0) {
         });
     }
 
+
+
+
+
+    
+
     // ================== PAGINATION ==================
     function setupPagination(data) {
         pagination.innerHTML = "";
@@ -384,6 +403,14 @@ document.getElementById("year").textContent = new Date().getFullYear();
         });
     }
 
+
+
+
+    
+
+
+
+
     // ================== SEARCH ==================
     function searchHouses() {
         const searchTerm = searchInput.value.toLowerCase().trim();
@@ -450,3 +477,4 @@ document.getElementById("year").textContent = new Date().getFullYear();
     nearbyLabel.style.display = "none"; // hide nearby label
     fetchHouses(); // load default all houses
 });
+

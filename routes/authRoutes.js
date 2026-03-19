@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const router = express.Router();
+const { protect } = require('../middleware/authMiddleware');
 
 /* ================= GENERATE TOKEN ================= */
 const generateToken = (id, role) => {
@@ -12,32 +13,31 @@ const generateToken = (id, role) => {
 /* ================= REGISTER ================= */
 router.post('/register', async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password, role, bio, location, profileImage } = req.body;
 
-        // Validate required fields
         if (!name || !email || !password || !role) {
             return res.status(400).json({ message: 'Please fill all required fields' });
         }
 
-        // Check if user exists
         const userExists = await User.findOne({ email });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Create new user
-        const user = await User.create({ name, email, password, role });
+        const user = await User.create({
+            name,
+            email,
+            password,
+            role,
+            bio: bio || '',
+            location: location || '',
+            profileImage: profileImage || undefined
+        });
 
-        // Return token and user info
         res.status(201).json({
             message: 'Registration successful',
             token: generateToken(user._id, user.role),
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
+            user
         });
 
     } catch (error) {
@@ -65,7 +65,6 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Check role
         if (user.role !== role) {
             return res.status(400).json({ message: `You are not registered as a ${role}` });
         }
@@ -73,17 +72,82 @@ router.post('/login', async (req, res) => {
         res.json({
             message: 'Login successful',
             token: generateToken(user._id, user.role),
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
+            user
         });
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+/* ================= GET PROFILE ================= */
+router.get('/profile', protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+            .populate('listings savedListings')
+            .select('-password'); // never return password
+
+        res.json(user);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to load profile', error: err.message });
+    }
+});
+
+
+// ================= UPDATE PROFILE =================
+router.put('/profile', protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Only update provided fields
+        const fields = ['name', 'bio', 'phone', 'location', 'profileImage'];
+        fields.forEach(f => {
+            if (req.body[f] !== undefined) user[f] = req.body[f];
+        });
+
+        // Recalculate profile completion
+        if (typeof user.calculateProfileCompletion === 'function') {
+            user.profileCompletion = user.calculateProfileCompletion();
+        }
+
+        await user.save();
+
+        res.json({ message: 'Profile updated', user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Update failed', error: err.message });
+    }
+});
+
+
+/* ================= UPLOAD VERIFICATION ================= */
+router.post('/verify', protect, async (req, res) => {
+    try {
+        const { nationalId, agentProof, utilityBill, landDocument } = req.body;
+        const user = req.user;
+
+        user.verification = {
+            status: 'pending',
+            documents: {
+                nationalId: nationalId || null,
+                agentProof: agentProof || null,
+                utilityBill: utilityBill || null,
+                landDocument: landDocument || null
+            }
+        };
+
+        await user.save();
+
+        res.json({ message: 'Verification submitted successfully!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Verification submission failed', error: err.message });
     }
 });
 
