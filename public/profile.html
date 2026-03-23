@@ -167,15 +167,31 @@
 <nav class="navbar">
     <div class="logo">HouseFinder</div>
     <ul class="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="/listings">Listings</a></li>
-        <li><a href="/profile" class="active">Profile</a></li>
+        <li><a href="index2.html">Home</a></li>
+        <li><a href="listings.html">Listings</a></li>
+        <li><a href="profile.html" class="active">Profile</a></li>
     </ul>
     <div class="user-info">
         <span id="navName">User Name</span>
         <span class="role-badge" id="navRole">role</span>
-    </div>
-</nav>
+    </div><div class="menu-toggle" id="mobile-menu">
+            ☰
+        </div>
+    </nav>
+
+    <div class="overlay" id="overlay"></div>
+
+    <section class="hamburger2" id="mobilemenu">
+        <ul>
+        <li><a href="index2.html">Home</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        
+        <li class="addListingLink"><a href="add.html">Post a property</a></li>
+        <li><a href="">About Us</a></li>
+        <li><a href="">Help Center</a></li>
+        <li><a href="#" class="logoutBtn">Logout</a></li>
+        </ul>
+    </section>
 
 <!-- ================= HERO ================= -->
 <div class="profile-hero"></div>
@@ -260,5 +276,36 @@ Edit Profile
 </div>
 
 <script src="js/profile.js"></script>
+
+<script>
+    // ================== MOBILE MENU ==================
+const menuToggle = document.getElementById("mobile-menu");
+const mobileMenu = document.getElementById("mobilemenu");
+const overlay = document.getElementById("overlay");
+
+if (menuToggle && mobileMenu && overlay) {
+    menuToggle.addEventListener("click", () => {
+        mobileMenu.classList.toggle("active");
+        overlay.classList.toggle("active");
+    });
+
+    overlay.addEventListener("click", () => {
+        mobileMenu.classList.remove("active");
+        overlay.classList.remove("active");
+    });
+
+    window.addEventListener("scroll", () => {
+        mobileMenu.classList.remove("active");
+        overlay.classList.remove("active");
+    });
+}
+    // Show/hide verification fields based on role
+    const role = localStorage.getItem('role');
+    if(role === 'agent') {
+        document.getElementById('agentFields').style.display = 'block';
+    } else if(role === 'owner') {
+        document.getElementById('ownerFields').style.display = 'block';
+    }
+    </script>
 </body>
 </html>

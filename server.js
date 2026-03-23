@@ -7,6 +7,7 @@ const path = require('path');
 const houseRoutes = require('./routes/houseRoutes'); 
 const authRoutes = require('./routes/authRoutes'); 
 const adminRoutes = require('./routes/adminRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 // ✅ ADD THIS 
 const app = express(); 
 
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes); // ✅ AUTH ROUTES 
 app.use('/api/houses', houseRoutes); // Houses routes
 app.use('/api/admin', adminRoutes); // Admin routes 
+app.use('/api/upload', uploadRoutes); // ✅ ADD THIS
 
 // ================= CLOUDINARY TEST =================
 const cloudinary = require('./config/cloudinary'); 

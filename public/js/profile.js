@@ -6,18 +6,16 @@ if (!user || !token) {
     console.warn("No user or token found.");
 }
 
-// ✅ Base API URL
 const API_URL = window.location.origin + "/api/auth";
-
-// Track uploaded profile image
 let uploadedImage = "";
 
-// ================== LOAD PROFILE =================
+// ================== LOAD PROFILE ==================
 async function loadProfile() {
     try {
         const res = await fetch(`${API_URL}/profile`, {
             headers: { Authorization: `Bearer ${token}` }
         });
+
         const data = await res.json();
 
         // ================= NAVBAR =================
@@ -53,30 +51,64 @@ async function loadProfile() {
             tips.innerText = "Complete your profile: " + missing.join(", ");
         }
 
+        // ================= ROLE UI =================
+        if (data.role === 'agent') {
+            document.getElementById('agentFields').style.display = 'block';
+        }
+
+        if (data.role === 'owner') {
+            document.getElementById('ownerFields').style.display = 'block';
+        }
+
         // ================= VERIFICATION =================
         const statusEl = document.getElementById('status');
         const badge = document.getElementById('verifiedBadge');
-        const form = document.getElementById('verificationForm');
+        const verificationForm = document.getElementById('verificationForm');
 
-        if (data.verification?.status === 'approved') {
-            statusEl.className = 'status-pill status-approved';
-            statusEl.innerText = 'Verified ✅';
-            badge.style.display = 'block';
-            form.style.display = 'none';
-        } else if (data.verification?.status === 'pending') {
-            statusEl.className = 'status-pill status-pending';
-            statusEl.innerText = 'Pending ⏳';
-        } else if (data.verification?.status === 'rejected') {
-            statusEl.className = 'status-pill status-rejected';
-            statusEl.innerText = 'Rejected ❌';
+        // 🚨 Restrict verification to agent & owner ONLY
+        if (data.role !== 'agent' && data.role !== 'owner') {
+            if (verificationForm) verificationForm.style.display = 'none';
+            if (statusEl) statusEl.style.display = 'none';
         } else {
-            statusEl.style.display = 'none';
-            form.style.display = 'none';
-        }
+            const status = data.verification?.status || 'unverified';
 
-        // ================= ROLE UI =================
-        if (data.role === 'agent') document.getElementById('agentFields').style.display = 'block';
-        if (data.role === 'owner') document.getElementById('ownerFields').style.display = 'block';
+            verificationForm.style.display = 'block';
+            statusEl.style.display = 'inline-block';
+
+            if (status === 'approved') {
+                statusEl.className = 'status-pill status-approved';
+                statusEl.innerText = 'Verified ✅';
+                badge.style.display = 'block';
+                verificationForm.style.display = 'none';
+            }
+            else if (status === 'pending') {
+                statusEl.className = 'status-pill status-pending';
+                statusEl.innerText = 'Pending ⏳';
+                verificationForm.style.display = 'none';
+            }
+            else if (status === 'rejected') {
+                statusEl.className = 'status-pill status-rejected';
+                statusEl.innerText = 'Rejected ❌ - Try again';
+            }
+            else {
+                statusEl.className = 'status-pill';
+                statusEl.innerText = 'Not Verified';
+            }
+
+            // ✅ Optional: role-based document fields
+            const agentField = document.getElementById('agentProofField');
+            const ownerField = document.getElementById('landDocumentField');
+
+            if (data.role === 'agent') {
+                if (agentField) agentField.style.display = 'block';
+                if (ownerField) ownerField.style.display = 'none';
+            }
+
+            if (data.role === 'owner') {
+                if (ownerField) ownerField.style.display = 'block';
+                if (agentField) agentField.style.display = 'none';
+            }
+        }
 
         // ================= STATS =================
         document.getElementById('listingsCount').innerText = data.listings?.length || 0;
@@ -92,6 +124,7 @@ loadProfile();
 
 // ================= CLOUDINARY UPLOAD =================
 const imageInput = document.getElementById('imageInput');
+
 if (imageInput) {
     imageInput.addEventListener('change', async () => {
         const file = imageInput.files[0];
@@ -111,6 +144,7 @@ if (imageInput) {
             });
 
             const data = await res.json();
+
             if (data.imageUrl) {
                 uploadedImage = data.imageUrl;
                 document.getElementById('profileImage').src = uploadedImage;
@@ -135,16 +169,17 @@ editBtn.addEventListener('click', async () => {
         editBtn.innerText = "Save Bio";
     } else {
         try {
-            const res = await fetch(`${API_URL}/profile`, {
+            await fetch(`${API_URL}/profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ bio: bioInput.value, profileImage: uploadedImage })
+                body: JSON.stringify({
+                    bio: bioInput.value,
+                    profileImage: uploadedImage
+                })
             });
-
-            const data = await res.json();
 
             bioText.innerText = bioInput.value;
             bioText.style.display = 'block';
@@ -168,16 +203,27 @@ const toBase64 = (file) => new Promise((resolve, reject) => {
 });
 
 // ================= VERIFY =================
-const form = document.getElementById('verificationForm');
+const verificationForm = document.getElementById('verificationForm');
 
-if (form) {
-    form.addEventListener('submit', async (e) => {
+if (verificationForm) {
+    verificationForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const nationalId = form.nationalId?.files[0] ? await toBase64(form.nationalId.files[0]) : null;
-        const agentProof = form.agentProof?.files[0] ? await toBase64(form.agentProof.files[0]) : null;
-        const utilityBill = form.utilityBill?.files[0] ? await toBase64(form.utilityBill.files[0]) : null;
-        const landDocument = form.landDocument?.files[0] ? await toBase64(form.landDocument.files[0]) : null;
+        const nationalId = verificationForm.nationalId?.files[0]
+            ? await toBase64(verificationForm.nationalId.files[0])
+            : null;
+
+        const agentProof = verificationForm.agentProof?.files[0]
+            ? await toBase64(verificationForm.agentProof.files[0])
+            : null;
+
+        const utilityBill = verificationForm.utilityBill?.files[0]
+            ? await toBase64(verificationForm.utilityBill.files[0])
+            : null;
+
+        const landDocument = verificationForm.landDocument?.files[0]
+            ? await toBase64(verificationForm.landDocument.files[0])
+            : null;
 
         try {
             const res = await fetch(`${API_URL}/verify`, {
@@ -186,12 +232,18 @@ if (form) {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ nationalId, agentProof, utilityBill, landDocument })
+                body: JSON.stringify({
+                    nationalId,
+                    agentProof,
+                    utilityBill,
+                    landDocument
+                })
             });
 
             const data = await res.json();
             alert(data.message);
             loadProfile();
+
         } catch (err) {
             console.error("Verification failed:", err);
             alert("Verification submission failed");

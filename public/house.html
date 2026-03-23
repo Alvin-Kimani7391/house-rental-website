@@ -26,6 +26,22 @@
         </div>
     </nav>
 
+    <div class="overlay" id="overlay"></div>
+
+    <section class="hamburger2" id="mobilemenu">
+        <ul>
+        <li><a href="index2.html">Home</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        
+        <li class="addListingLink"><a href="add.html">Post a property</a></li>
+        <li><a href="">About Us</a></li>
+        <li><a href="">Help Center</a></li>
+        <li><a href="#" class="logoutBtn">Logout</a></li>
+        </ul>
+    </section>
+
+
+
     <!-- HOUSE DETAILS SECTION -->
     <section class="house-details" id="houseDetails">
         <!-- JS will load house details here -->
@@ -34,6 +50,29 @@
     <script src="js/house.js"></script>
 
     <script>
+
+        // ================== MOBILE MENU ==================
+const menuToggle = document.getElementById("mobile-menu");
+const mobileMenu = document.getElementById("mobilemenu");
+const overlay = document.getElementById("overlay");
+
+if (menuToggle && mobileMenu && overlay) {
+    menuToggle.addEventListener("click", () => {
+        mobileMenu.classList.toggle("active");
+        overlay.classList.toggle("active");
+    });
+
+    overlay.addEventListener("click", () => {
+        mobileMenu.classList.remove("active");
+        overlay.classList.remove("active");
+    });
+
+    window.addEventListener("scroll", () => {
+        mobileMenu.classList.remove("active");
+        overlay.classList.remove("active");
+    });
+}
+
     const userInfo = document.getElementById('userInfo');
     const addListingLink = document.getElementById('addListingLink');
 
