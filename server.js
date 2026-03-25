@@ -23,6 +23,7 @@ app.use('/api/admin', adminRoutes); // Admin routes
 app.use('/api/upload', uploadRoutes); // ✅ ADD THIS
 
 // ================= CLOUDINARY TEST =================
+//const { cloudinary } = require('../config/cloudinary');
 const cloudinary = require('./config/cloudinary'); 
 app.get('/api/test-upload', async (req, res) => { 
     try { 
@@ -35,6 +36,9 @@ app.get('/api/test-upload', async (req, res) => {
         res.status(500).json({ message: 'Upload failed', error: err.message }); 
     } 
 }); 
+
+
+
 
 // Catch-all for API routes (return JSON instead of HTML)
 app.use(/^\/api\/.*$/, (req, res) => {

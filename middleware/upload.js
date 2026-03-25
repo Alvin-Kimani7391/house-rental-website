@@ -7,21 +7,31 @@ const { cloudinary } = require('../config/cloudinary');
 const createCloudinaryStorage = (folderName) => new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
-    folder: folderName,
-    resource_type: 'auto', // images & videos
-  }),
+  folder: `verification-docs/${req.user._id}`, // 👈 per user
+  resource_type: 'auto',
+}),
 });
 
-// Profile image upload middleware
+// Profile image upload
 const uploadProfile = multer({
   storage: createCloudinaryStorage('profile-images'),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max for profile
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-// House/listing upload middleware
+// Listing upload
 const uploadListing = multer({
   storage: createCloudinaryStorage('house-listings'),
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max for listings
+  limits: { fileSize: 50 * 1024 * 1024 },
 });
 
-module.exports = { uploadProfile, uploadListing };
+// ✅ NEW: Verification documents
+const uploadVerification = multer({
+  storage: createCloudinaryStorage('verification-docs'),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per doc
+});
+
+module.exports = {
+  uploadProfile,
+  uploadListing,
+  uploadVerification // ✅ export it
+};

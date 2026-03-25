@@ -251,13 +251,17 @@ Edit Profile
     <div class="glass-card">
         <h3 style="margin-bottom:15px;">Verification Documents</h3>
         <form id="verificationForm">
-            <input type="file" name="nationalId" required>
+            <label>National ID</label>
+            <input type="file" name="nationalId" required >
             <div id="agentFields" style="display:none;">
-                <input type="file" name="agentProof">
+                <label>Agent Proof</label>
+                <input type="file" name="agentProof" >
             </div>
             <div id="ownerFields" style="display:none;">
-                <input type="file" name="utilityBill">
-                <input type="file" name="landDocument">
+                <label>Utility Bill</label>
+                <input type="file" name="utilityBill" >
+                <label>Land Document</label>
+                <input type="file" name="landDocument" >
             </div>
             <button class="contact-btn">Submit for Verification</button>
         </form>

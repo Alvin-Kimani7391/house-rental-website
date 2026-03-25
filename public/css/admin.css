@@ -190,3 +190,118 @@ h1, h2 {
     padding: 20px;
     
 }
+
+
+/* ================= ADMIN LOGIN - FORM ================= */
+.admin-login-form {
+    background: white;
+    padding: 40px 35px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Headings */
+.admin-login-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #111;
+}
+
+/* Inputs */
+.admin-login-form input,
+.admin-login-form select {
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    transition: 0.3s;
+    outline: none;
+}
+
+.admin-login-form input:focus,
+.admin-login-form select:focus {
+    border-color: #00b894;
+    box-shadow: 0 0 0 2px rgba(0,184,148,0.15);
+}
+
+/* Buttons */
+.admin-login-form button {
+    padding: 14px;
+    background: #00b894;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.admin-login-form button:hover {
+    background: #019875;
+    transform: translateY(-2px);
+}
+
+.admin-login-form button:active {
+    transform: scale(0.98);
+}
+
+/* Small links */
+.admin-login-extra {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.admin-login-extra a {
+    color: #00b894;
+    text-decoration: none;
+}
+
+.admin-login-extra a:hover {
+    text-decoration: underline;
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= MOBILE RESPONSIVE ================= */
+@media (max-width: 480px) {
+    .admin-login-form {
+        padding: 30px 20px;
+        border-radius: 12px;
+        width: 100%;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .admin-login-form h2 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .admin-login-form input,
+    .admin-login-form select {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .admin-login-form button {
+        font-size: 15px;
+        padding: 12px;
+    }
+
+    .admin-login-extra {
+        font-size: 13px;
+    }
+}

@@ -8,6 +8,7 @@ const path = require('path');
 const { cloudinary } = require('../config/cloudinary');
 const { protect } = require('../middleware/authMiddleware');
 const geocoder = require('../config/geocoder'); // Node-Geocoder
+const { uploadListing } = require('../middleware/upload'); // ✅ add this line
 
 // ================== MULTER CONFIG ==================
 const storage = multer.diskStorage({
@@ -84,10 +85,11 @@ router.get('/my/listings', protect, async (req, res) => {
 });
 
 // ADD NEW HOUSE
+// ================== ADD NEW HOUSE ==================
 router.post(
   '/',
   protect,
-  upload.fields([
+  uploadListing.fields([
     { name: 'images', maxCount: 10 },
     { name: 'video', maxCount: 1 }
   ]),
@@ -95,10 +97,12 @@ router.post(
     try {
       const { title, price, location, bedrooms, bathrooms, description, contact } = req.body;
 
+      // Validate required fields
       if (!title || !price || !location || !bedrooms || !bathrooms || !description || !contact) {
         return res.status(400).json({ message: 'Please provide all required fields' });
       }
 
+      // Geocode the location
       const geoData = await geocoder.geocode(location);
       if (!geoData.length) return res.status(400).json({ message: "Invalid location" });
 
@@ -107,52 +111,29 @@ router.post(
         coordinates: [geoData[0].longitude, geoData[0].latitude]
       };
 
-      // Upload images
-      let images = [];
-      if (req.files && req.files.images) {
-        images = await Promise.all(
-          req.files.images.map(file =>
-            new Promise((resolve, reject) => {
-              cloudinary.uploader.upload(
-                file.path,
-                { folder: 'house-listings/images' },
-                (err, result) => {
-                  fs.unlinkSync(file.path);
-                  if (err) return reject(err);
-                  resolve(result.secure_url);
-                }
-              );
-            })
-          )
-        );
-      }
+      // Get uploaded files URLs from CloudinaryStorage
+      const images = req.files.images ? req.files.images.map(f => f.path) : [];
+      const video = req.files.video ? req.files.video[0].path : null;
 
-      // Upload video
-      let video = null;
-      if (req.files && req.files.video && req.files.video[0]) {
-        const file = req.files.video[0];
-        video = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload(
-            file.path,
-            { resource_type: 'video', folder: 'house-listings/videos' },
-            (err, result) => {
-              fs.unlinkSync(file.path);
-              if (err) return reject(err);
-              resolve(result.secure_url);
-            }
-          );
-        });
-      }
-
+      // Create new house
       const newHouse = new House({
-        title, price, location, bedrooms, bathrooms, description,
-        contact, images, video, coordinates, owner: req.user._id
+        title,
+        price,
+        location,
+        bedrooms,
+        bathrooms,
+        description,
+        contact,
+        images,
+        video,
+        coordinates,
+        owner: req.user._id
       });
 
       const savedHouse = await newHouse.save();
       res.status(201).json(savedHouse);
     } catch (err) {
-      console.error('House POST error:', err);
+      console.error('House POST error:', err); // logs full stack
       res.status(500).json({ message: 'Server error', error: err.message });
     }
   }

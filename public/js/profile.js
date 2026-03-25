@@ -2,9 +2,7 @@
 const user = JSON.parse(localStorage.getItem('user'));
 const token = localStorage.getItem('token');
 
-if (!user || !token) {
-    console.warn("No user or token found.");
-}
+if (!user || !token) console.warn("No user or token found.");
 
 const API_URL = window.location.origin + "/api/auth";
 let uploadedImage = "";
@@ -18,28 +16,23 @@ async function loadProfile() {
 
         const data = await res.json();
 
-        // ================= NAVBAR =================
         document.getElementById('navName').innerText = data.name;
         document.getElementById('navRole').innerText = data.role;
 
-        // ================= PROFILE =================
         document.getElementById('profileName').innerText = data.name;
         document.getElementById('profileMeta').innerText =
             `${data.email} • Joined ${new Date(data.createdAt).getFullYear()}`;
 
-        document.getElementById('profileBio').innerText =
-            data.bio || "No bio added yet.";
+        document.getElementById('profileBio').innerText = data.bio || "No bio added yet.";
 
         const profileImage = document.getElementById('profileImage');
         profileImage.src = data.profileImage || '/images/default-avatar.png';
         uploadedImage = data.profileImage || "";
 
-        // ================= PROGRESS =================
         const completion = data.profileCompletion || 0;
         document.getElementById('completion').innerText = `${completion}% complete`;
         document.getElementById('progressBar').style.width = `${completion}%`;
 
-        // ================= PROFILE TIPS =================
         let missing = [];
         if (!data.bio) missing.push("Add bio");
         if (!data.location) missing.push("Add location");
@@ -47,25 +40,16 @@ async function loadProfile() {
         if (!data.profileImage) missing.push("Upload photo");
 
         const tips = document.getElementById('profileTips');
-        if (tips && missing.length > 0) {
-            tips.innerText = "Complete your profile: " + missing.join(", ");
-        }
+        if (tips && missing.length > 0) tips.innerText = "Complete your profile: " + missing.join(", ");
 
-        // ================= ROLE UI =================
-        if (data.role === 'agent') {
-            document.getElementById('agentFields').style.display = 'block';
-        }
-
-        if (data.role === 'owner') {
-            document.getElementById('ownerFields').style.display = 'block';
-        }
+        if (data.role === 'agent') document.getElementById('agentFields').style.display = 'block';
+        if (data.role === 'owner') document.getElementById('ownerFields').style.display = 'block';
 
         // ================= VERIFICATION =================
         const statusEl = document.getElementById('status');
         const badge = document.getElementById('verifiedBadge');
         const verificationForm = document.getElementById('verificationForm');
 
-        // 🚨 Restrict verification to agent & owner ONLY
         if (data.role !== 'agent' && data.role !== 'owner') {
             if (verificationForm) verificationForm.style.display = 'none';
             if (statusEl) statusEl.style.display = 'none';
@@ -80,22 +64,18 @@ async function loadProfile() {
                 statusEl.innerText = 'Verified ✅';
                 badge.style.display = 'block';
                 verificationForm.style.display = 'none';
-            }
-            else if (status === 'pending') {
+            } else if (status === 'pending') {
                 statusEl.className = 'status-pill status-pending';
                 statusEl.innerText = 'Pending ⏳';
                 verificationForm.style.display = 'none';
-            }
-            else if (status === 'rejected') {
+            } else if (status === 'rejected') {
                 statusEl.className = 'status-pill status-rejected';
                 statusEl.innerText = 'Rejected ❌ - Try again';
-            }
-            else {
+            } else {
                 statusEl.className = 'status-pill';
                 statusEl.innerText = 'Not Verified';
             }
 
-            // ✅ Optional: role-based document fields
             const agentField = document.getElementById('agentProofField');
             const ownerField = document.getElementById('landDocumentField');
 
@@ -103,14 +83,12 @@ async function loadProfile() {
                 if (agentField) agentField.style.display = 'block';
                 if (ownerField) ownerField.style.display = 'none';
             }
-
             if (data.role === 'owner') {
                 if (ownerField) ownerField.style.display = 'block';
                 if (agentField) agentField.style.display = 'none';
             }
         }
 
-        // ================= STATS =================
         document.getElementById('listingsCount').innerText = data.listings?.length || 0;
         document.getElementById('savedCount').innerText = data.savedListings?.length || 0;
         document.getElementById('rating').innerText = `${data.rating || 0}⭐`;
@@ -122,14 +100,13 @@ async function loadProfile() {
 
 loadProfile();
 
-// ================= CLOUDINARY UPLOAD =================
+// ================= PROFILE IMAGE UPLOAD =================
 const imageInput = document.getElementById('imageInput');
 
 if (imageInput) {
     imageInput.addEventListener('change', async () => {
         const file = imageInput.files[0];
         if (!file) return;
-
         if (!file.type.startsWith('image/')) return alert('Only images allowed');
         if (file.size > 5 * 1024 * 1024) return alert('Max 5MB');
 
@@ -142,9 +119,7 @@ if (imageInput) {
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData
             });
-
             const data = await res.json();
-
             if (data.imageUrl) {
                 uploadedImage = data.imageUrl;
                 document.getElementById('profileImage').src = uploadedImage;
@@ -171,21 +146,14 @@ editBtn.addEventListener('click', async () => {
         try {
             await fetch(`${API_URL}/profile`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    bio: bioInput.value,
-                    profileImage: uploadedImage
-                })
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ bio: bioInput.value, profileImage: uploadedImage })
             });
 
             bioText.innerText = bioInput.value;
             bioText.style.display = 'block';
             bioInput.classList.add('hidden');
             editBtn.innerText = "Edit Bio";
-
             loadProfile();
         } catch (err) {
             console.error("Failed to save bio:", err);
@@ -194,50 +162,53 @@ editBtn.addEventListener('click', async () => {
     }
 });
 
-// ================= FILE → BASE64 =================
-const toBase64 = (file) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-});
+// ================= DOCUMENT UPLOAD HELPER =================
+async function uploadDocument(file, type) {
+    const formData = new FormData();
+    formData.append('document', file);
+    formData.append('type', type); // send type to backend
 
-// ================= VERIFY =================
+    const res = await fetch(`${window.location.origin}/api/upload/verification-doc`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+    });
+
+    const data = await res.json();
+    if (!data.url) throw new Error("Upload failed");
+    return data.url;
+}
+
+// ================= VERIFY FORM =================
 const verificationForm = document.getElementById('verificationForm');
 
 if (verificationForm) {
     verificationForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const nationalId = verificationForm.nationalId?.files[0]
-            ? await toBase64(verificationForm.nationalId.files[0])
-            : null;
-
-        const agentProof = verificationForm.agentProof?.files[0]
-            ? await toBase64(verificationForm.agentProof.files[0])
-            : null;
-
-        const utilityBill = verificationForm.utilityBill?.files[0]
-            ? await toBase64(verificationForm.utilityBill.files[0])
-            : null;
-
-        const landDocument = verificationForm.landDocument?.files[0]
-            ? await toBase64(verificationForm.landDocument.files[0])
-            : null;
-
         try {
+            alert("Uploading documents...");
+
+            const files = {
+                nationalId: verificationForm.nationalId?.files[0],
+                agentProof: verificationForm.agentProof?.files[0],
+                utilityBill: verificationForm.utilityBill?.files[0],
+                landDocument: verificationForm.landDocument?.files[0]
+            };
+
+            const uploadPromises = Object.entries(files).map(async ([key, file]) => {
+                if (!file) return [key, null];
+                const url = await uploadDocument(file, key);
+                return [key, url];
+            });
+
+            const results = await Promise.all(uploadPromises);
+            const urls = Object.fromEntries(results);
+
             const res = await fetch(`${API_URL}/verify`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    nationalId,
-                    agentProof,
-                    utilityBill,
-                    landDocument
-                })
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify(urls)
             });
 
             const data = await res.json();

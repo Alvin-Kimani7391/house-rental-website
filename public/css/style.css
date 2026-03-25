@@ -1775,3 +1775,166 @@ footer {
 }
 
 }
+
+/* ================= LOGIN & REGISTER RESPONSIVE ================= */
+
+/* Base Section Styling */
+.login-section,
+.register-section {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
+                url('https://images.unsplash.com/photo-1560518883-ce09059eeffa');
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Form Styling */
+#loginForm,
+#registerForm {
+    background: white;
+    padding: 40px 35px;
+    width: 100%;
+    max-width: 400px; /* for register can also keep 450px */
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    animation: fadeIn 0.5s ease-in-out;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+#loginForm:hover,
+#registerForm:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+}
+
+/* Headings */
+#loginForm h2,
+#registerForm h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #111;
+}
+
+/* Inputs & Selects */
+#loginForm input,
+#loginForm select,
+#registerForm input,
+#registerForm select {
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    transition: 0.3s;
+    outline: none;
+}
+
+#loginForm input:focus,
+#loginForm select:focus,
+#registerForm input:focus,
+#registerForm select:focus {
+    border-color: #00b894;
+    box-shadow: 0 0 0 2px rgba(0,184,148,0.15);
+}
+
+/* Buttons */
+#loginForm button,
+#registerForm button {
+    padding: 14px;
+    background: #00b894;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+#loginForm button:hover,
+#registerForm button:hover {
+    background: #019875;
+    transform: translateY(-2px);
+}
+
+#loginForm button:active,
+#registerForm button:active {
+    transform: scale(0.98);
+}
+
+/* Small Links */
+.login-extra,
+.register-extra {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.login-extra a,
+.register-extra a {
+    color: #00b894;
+    text-decoration: none;
+}
+
+.login-extra a:hover,
+.register-extra a:hover {
+    text-decoration: underline;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= MOBILE OPTIMIZATION ================= */
+@media (max-width: 480px) {
+    #loginForm,
+    #registerForm {
+        padding: 30px 20px;
+        border-radius: 12px;
+        width: 100%;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    #loginForm h2,
+    #registerForm h2 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    #loginForm input,
+    #loginForm select,
+    #registerForm input,
+    #registerForm select {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    #loginForm button,
+    #registerForm button {
+        font-size: 15px;
+        padding: 12px;
+    }
+
+    .login-extra,
+    .register-extra {
+        font-size: 13px;
+    }
+}
+
+/* Optional: subtle placeholder style */
+#loginForm input::placeholder,
+#registerForm input::placeholder {
+    color: #aaa;
+    font-style: italic;
+}
