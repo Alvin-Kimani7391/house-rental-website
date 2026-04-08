@@ -1,15 +1,6 @@
-
-
-
-
 // ================== main.js ==================
 document.addEventListener('DOMContentLoaded', () => {
 
-
-
-
-
-    
     const container = document.getElementById("houseContainer");
     const searchInput = document.getElementById("searchInput");
     const searchBtn = document.getElementById("searchBtn");
@@ -22,9 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let houses = [];          // All houses fetched
     let filteredHouses = [];  // Houses filtered by search/nearby
     let activeSuggestion = -1;
-
-
-    
 
     // ================== NEARBY LABEL ==================
     const nearbyLabel = document.createElement("h2");
@@ -126,72 +114,60 @@ document.addEventListener('DOMContentLoaded', () => {
         return localStorage.getItem('token');
     }
 
-
-
     // ================== FOOTER FILTER -> SEARCH ==================
-
-document.querySelectorAll(".property-filter").forEach(link => {
-
-    link.addEventListener("click", function(e) {
-        e.preventDefault();
-
-        const searchValue = this.dataset.search;
-
-        // put value in search box
-        searchInput.value = searchValue;
-
-        // trigger search
-        searchHouses();
-
-        // scroll to listings
-        document.querySelector(".listings").scrollIntoView({
-            behavior: "smooth"
+    document.querySelectorAll(".property-filter").forEach(link => {
+        link.addEventListener("click", function(e) {
+            e.preventDefault();
+            const searchValue = this.dataset.search;
+            searchInput.value = searchValue;
+            searchHouses();
+            document.querySelector(".listings").scrollIntoView({ behavior: "smooth" });
         });
     });
 
-});
-
-
-// ================== PROPERTY TYPE FILTER (USING TITLE) ==================
-
-document.querySelectorAll(".property-filter").forEach(link => {
-
-    link.addEventListener("click", function(e) {
-        e.preventDefault();
-
-        const type = this.dataset.type.toLowerCase();
-
-        const filtered = houses.filter(house =>
-            house.title && house.title.toLowerCase().includes(type)
-        );
-
-        loadHouses(filtered);
-
-        // scroll to listings
-        document.querySelector(".listings").scrollIntoView({
-            behavior: "smooth"
+    // ================== PROPERTY TYPE FILTER (USING TITLE) ==================
+    document.querySelectorAll(".property-filter").forEach(link => {
+        link.addEventListener("click", function(e) {
+            e.preventDefault();
+            const type = this.dataset.type.toLowerCase();
+            const filtered = houses.filter(house =>
+                house.title && house.title.toLowerCase().includes(type)
+            );
+            loadHouses(filtered);
+            document.querySelector(".listings").scrollIntoView({ behavior: "smooth" });
         });
-
     });
-
-});
-
-
-
 
     // ================== FETCH HOUSES ==================
     async function fetchHouses() {
         try {
             showLoader();
-            const res = await fetch('/api/houses');
+            const token = localStorage.getItem("token");
+            let headers = {};
+            if (token) headers["Authorization"] = `Bearer ${token}`;
+
+            const res = await fetch('/api/houses', { headers });
             const data = await res.json();
+
             if (!Array.isArray(data)) {
                 console.error('API did not return an array:', data);
                 container.innerHTML = `<p style="color:red;">Error: Invalid data from API</p>`;
                 return;
             }
+
             houses = shuffleArray(data);
+
+            if (token) {
+                const userId = parseJwt(token)._id;
+                houses.forEach(house => {
+                    house.isSaved = house.favorites
+                        ? house.favorites.some(id => id.toString() === userId)
+                        : false;
+                });
+            }
+
             filteredHouses = houses;
+            currentPage = 1;
             loadHouses(filteredHouses);
             setupPagination(filteredHouses);
         } catch (err) {
@@ -202,38 +178,59 @@ document.querySelectorAll(".property-filter").forEach(link => {
         }
     }
 
+    // ================== JWT HELPER ==================
+    function parseJwt(token) {
+        try {
+            return JSON.parse(atob(token.split('.')[1]));
+        } catch (e) {
+            return {};
+        }
+    }
+
     // ================== FETCH NEARBY HOUSES ==================
     async function fetchNearbyHouses(lat, lng) {
         try {
             showLoader();
-            const res = await fetch(`/api/houses/nearby?lat=${lat}&lng=${lng}`);
+            const token = localStorage.getItem("token");
+            let headers = {};
+            if (token) headers["Authorization"] = `Bearer ${token}`;
+
+            const res = await fetch(`/api/houses/nearby?lat=${lat}&lng=${lng}`, { headers });
             const nearbyHouses = await res.json();
-if (Array.isArray(nearbyHouses) && nearbyHouses.length > 0) {
-    filteredHouses = nearbyHouses;
-    currentPage = 1;
 
-    // Remove previous badge if exists
-    const oldBadge = document.querySelector('.nearby-badge');
-    if (oldBadge) oldBadge.remove();
-
-    // Create badge element
-    const badge = document.createElement('div');
-    badge.className = 'nearby-badge show-center';
-    badge.innerHTML = `<i class="fa-solid fa-location-dot"></i> <span>Showing houses near you</span>`;
-    document.body.appendChild(badge);
-
-    // After popup animation, move it to top-center
-    setTimeout(() => {
-        badge.classList.remove('show-center');
-        badge.classList.add('show-top'); // new class for top-center
-    }, 2000); // 2 seconds for initial popup
-
-    loadHouses(filteredHouses);
-    setupPagination(filteredHouses);
-} else {
+            if (!Array.isArray(nearbyHouses) || nearbyHouses.length === 0) {
                 nearbyLabel.style.display = "none";
                 container.innerHTML = "<p>No nearby houses found.</p>";
+                return;
             }
+
+            if (token) {
+                const userId = parseJwt(token)._id;
+                nearbyHouses.forEach(house => {
+                    house.isSaved = house.favorites
+                        ? house.favorites.some(id => id.toString() === userId)
+                        : false;
+                });
+            }
+
+            filteredHouses = nearbyHouses;
+            currentPage = 1;
+
+            const oldBadge = document.querySelector('.nearby-badge');
+            if (oldBadge) oldBadge.remove();
+
+            const badge = document.createElement('div');
+            badge.className = 'nearby-badge show-center';
+            badge.innerHTML = `<i class="fa-solid fa-location-dot"></i> <span>Showing houses near you</span>`;
+            document.body.appendChild(badge);
+
+            setTimeout(() => {
+                badge.classList.remove('show-center');
+                badge.classList.add('show-top');
+            }, 2000);
+
+            loadHouses(filteredHouses);
+            setupPagination(filteredHouses);
         } catch (err) {
             nearbyLabel.style.display = "none";
             console.error("Error fetching nearby houses:", err);
@@ -243,84 +240,160 @@ if (Array.isArray(nearbyHouses) && nearbyHouses.length > 0) {
         }
     }
 
+
+function toggleFavorite(house, heartEl) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Please login to save favorites!");
+        window.location.href = "login.html";
+        return;
+    }
+
+    fetch(`/api/houses/${house._id}/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
+    })
+    .then(res => res.json().then(result => ({ ok: res.ok, result })))
+    .then(({ ok, result }) => {
+        if (ok) {
+            house.isSaved = !house.isSaved;
+            heartEl.innerHTML = house.isSaved ? "❤️" : "🤍";
+            heartEl.title = house.isSaved ? "Remove from favorites" : "Add to favorites";
+        } else {
+            alert(result.message || "Error saving favorite");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error saving favorite");
+    });
+}
+
     // ================== LOAD HOUSES ==================
     function loadHouses(data) {
-        container.innerHTML = "";
+    container.innerHTML = "";
 
-        if (!data || data.length === 0) {
-            container.innerHTML = "<p>No houses found.</p>";
+    if (!data || data.length === 0) {
+        container.innerHTML = "<p>No houses found.</p>";
+        return;
+    }
+
+    const start = (currentPage - 1) * housesPerPage;
+    const end = start + housesPerPage;
+    const housesToShow = data.slice(start, end);
+
+    // Helper to toggle favorite state
+    async function toggleFavorite(house, heartEl) {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Please login to save favorites!");
+            window.location.href = "login.html";
             return;
         }
 
-        const start = (currentPage - 1) * housesPerPage;
-        const end = start + housesPerPage;
-        const housesToShow = data.slice(start, end);
-
-        housesToShow.forEach(house => {
-            const card = document.createElement("div");
-            card.className = "card";
-
-            const tooltip = document.createElement("div");
-            tooltip.className = "tooltip";
-            tooltip.textContent = "Click the house to view more details";
-            card.appendChild(tooltip);
-
-            card.onclick = () => {
-                if (!isLoggedIn()) {
-                    alert("Please login to view house details!");
-                    window.location.href = "login.html";
-                    return;
+        try {
+            const res = await fetch(`/api/houses/${house._id}/save`, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json", 
+                    "Authorization": `Bearer ${token}` 
                 }
-                window.location.href = `house.html?id=${house._id}`;
-            };
+            });
+            const result = await res.json();
 
-            if (house.images && house.images.length > 0) {
+            if (res.ok) {
+                // Update house object and UI
+                house.isSaved = !house.isSaved;
+                heartEl.innerHTML = house.isSaved ? "❤️" : "🤍";
+                heartEl.title = house.isSaved ? "Remove from favorites" : "Add to favorites";
 
-    const imageWrapper = document.createElement("div");
-    imageWrapper.className = "card-image";
+                // Update main houses array
+                const idx = houses.findIndex(h => h._id === house._id);
+                if (idx !== -1) houses[idx].isSaved = house.isSaved;
 
-    const img = document.createElement("img");
-    img.src = house.images[0];
-    img.alt = house.title;
-
-    imageWrapper.appendChild(img);
-
-    // STATUS BADGE
-    const badge = document.createElement("span");
-    badge.className = `status-badge ${house.status || "available"}`;
-    badge.textContent = house.status ? house.status.toUpperCase() : "AVAILABLE";
-
-    imageWrapper.appendChild(badge);
-
-    card.appendChild(imageWrapper);
-}
-
-            const cardBody = document.createElement("div");
-            cardBody.className = "card-body";
-
-            const title = document.createElement("h3");
-            title.textContent = house.title;
-            cardBody.appendChild(title);
-
-            const location = document.createElement("p");
-            location.textContent = house.location;
-            cardBody.appendChild(location);
-
-            const price = document.createElement("p");
-            price.className = "price";
-            price.textContent = `$${house.price}/month`;
-            cardBody.appendChild(price);
-
-            card.appendChild(cardBody);
-            container.appendChild(card);
-        });
+                // Update filteredHouses array to persist in current view
+                const fIdx = filteredHouses.findIndex(h => h._id === house._id);
+                if (fIdx !== -1) filteredHouses[fIdx].isSaved = house.isSaved;
+            } else {
+                alert(result.message || "Error saving favorite");
+            }
+        } catch (err) {
+            console.error("Favorite toggle error:", err);
+            alert("Error saving favorite");
+        }
     }
 
+    housesToShow.forEach(house => {
+        const card = document.createElement("div");
+        card.className = "card";
 
+        const tooltip = document.createElement("div");
+        tooltip.className = "tooltip";
+        tooltip.textContent = "Click the house to view more details";
+        card.appendChild(tooltip);
 
+        card.onclick = (e) => {
+            if (e.target.classList.contains("favorite-heart")) return;
+            const id = house._id;
+            window.location.href = `house.html?id=${id}`;
+        };
 
+        if (house.images && house.images.length > 0) {
+            const imageWrapper = document.createElement("div");
+            imageWrapper.className = "card-image";
 
-    
+            const img = document.createElement("img");
+            img.src = house.images[0];
+            img.alt = house.title;
+            imageWrapper.appendChild(img);
+
+            const badge = document.createElement("span");
+            badge.className = `status-badge ${house.status || "available"}`;
+            badge.textContent = house.status ? house.status.toUpperCase() : "AVAILABLE";
+            imageWrapper.appendChild(badge);
+
+            const heart = document.createElement("span");
+            heart.className = "favorite-heart";
+            heart.innerHTML = house.isSaved ? "❤️" : "🤍";
+            heart.title = house.isSaved ? "Remove from favorites" : "Add to favorites";
+            heart.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                font-size: 1.5rem;
+                cursor: pointer;
+                user-select: none;
+            `;
+
+            heart.addEventListener("click", e => {
+                e.stopPropagation();
+                toggleFavorite(house, heart);
+            });
+
+            imageWrapper.appendChild(heart);
+            card.appendChild(imageWrapper);
+        }
+
+        const cardBody = document.createElement("div");
+        cardBody.className = "card-body";
+
+        const title = document.createElement("h3");
+        title.textContent = house.title;
+        cardBody.appendChild(title);
+
+        const location = document.createElement("p");
+        location.textContent = house.location;
+        cardBody.appendChild(location);
+
+        const price = document.createElement("p");
+        price.className = "price";
+        price.textContent = `$${house.price}/month`;
+        cardBody.appendChild(price);
+
+        card.appendChild(cardBody);
+        container.appendChild(card);
+    });
+}
 
     // ================== PAGINATION ==================
     function setupPagination(data) {
@@ -372,9 +445,8 @@ if (Array.isArray(nearbyHouses) && nearbyHouses.length > 0) {
         if (currentPage < pageCount) pagination.appendChild(createButton("→", currentPage + 1, "nav"));
     }
 
-
-// Dynamic year in footer
-document.getElementById("year").textContent = new Date().getFullYear();
+    // Dynamic year in footer
+    document.getElementById("year").textContent = new Date().getFullYear();
 
     // ================== GEO BUTTON CLICK ==================
     if (geoBtn) {
@@ -402,14 +474,6 @@ document.getElementById("year").textContent = new Date().getFullYear();
             );
         });
     }
-
-
-
-
-    
-
-
-
 
     // ================== SEARCH ==================
     function searchHouses() {
@@ -469,6 +533,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
     document.addEventListener("click", e => { if (!e.target.closest(".search-box")) hideSuggestions(); });
     searchBtn.addEventListener("click", e => { e.preventDefault(); searchHouses(); hideSuggestions(); });
+
     function showSuggestions() { suggestionsList.classList.add("active"); }
     function hideSuggestions() { suggestionsList.classList.remove("active"); }
     function setActive(items) { items.forEach((li, idx) => li.classList.toggle("active", idx === activeSuggestion)); }
@@ -477,4 +542,3 @@ document.getElementById("year").textContent = new Date().getFullYear();
     nearbyLabel.style.display = "none"; // hide nearby label
     fetchHouses(); // load default all houses
 });
-

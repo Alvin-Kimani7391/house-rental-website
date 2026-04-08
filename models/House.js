@@ -46,6 +46,15 @@ const houseSchema = new mongoose.Schema({
     default: 'available'
   },
 
+  // ================= NEW FEATURES =================
+  views: { type: Number, default: 0 },
+
+  favorites: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  // ===============================================
+
   createdAt: { type: Date, default: Date.now }
 
 });

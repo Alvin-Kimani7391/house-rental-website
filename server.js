@@ -11,6 +11,14 @@ const uploadRoutes = require('./routes/uploadRoutes');
 // ✅ ADD THIS 
 const app = express(); 
 
+const session = require('express-session');
+app.use(session({
+  secret: 'yourSecretKey',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 24 * 60 * 60 * 1000 }
+}));
+
 // ================= MIDDLEWARE =================
 app.use(cors()); 
 app.use(express.json()); 

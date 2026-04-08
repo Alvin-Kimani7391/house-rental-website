@@ -23,7 +23,39 @@ async function loadProfile() {
         document.getElementById('profileMeta').innerText =
             `${data.email} • Joined ${new Date(data.createdAt).getFullYear()}`;
 
-        document.getElementById('profileBio').innerText = data.bio || "No bio added yet.";
+        // ================= NEW: PHONE + LOCATION =================
+        const contact = [];
+        if (data.phone) contact.push(`📞 ${data.phone}`);
+        if (data.location) contact.push(`📍 ${data.location}`);
+
+        // ================= CONTACT UI =================
+const contactEl = document.getElementById('profileContact');
+
+if (contactEl) {
+    let html = "";
+
+    if (data.phone) {
+    html += `
+        <a href="tel:${data.phone}" class="contact-pill">
+            <span>📞</span> ${data.phone}
+        </a>
+    `;
+}
+
+    if (data.location) {
+        html += `
+            <div class="contact-pill">
+                <span>📍</span> ${data.location}
+            </div>
+        `;
+    }
+
+    contactEl.innerHTML = html || `<div class="contact-pill">No contact details</div>`;
+}
+        // =======================================================
+        
+        
+            document.getElementById('profileBio').innerText = data.bio || "No bio added yet.";
 
         const profileImage = document.getElementById('profileImage');
         profileImage.src = data.profileImage || '/images/default-avatar.png';
@@ -98,7 +130,118 @@ async function loadProfile() {
     }
 }
 
+
+
+
+// ================== LOAD MY LISTINGS (PRO FINAL) ==================
+async function loadMyListings() {
+    const container = document.getElementById("dashboardGrid");
+    const countEl = document.getElementById("listingCount");
+
+    if (!container) return;
+
+    try {
+        container.innerHTML = "<p>Loading listings...</p>";
+
+        const res = await fetch("/api/houses/my/listings", {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const houses = await res.json();
+        countEl.innerText = houses.length;
+
+        if (!houses.length) {
+            container.innerHTML = `<p style="color:#777;">No listings yet.</p>`;
+            return;
+        }
+
+        container.innerHTML = "";
+
+        houses.forEach(house => {
+            const firstImage =
+                house.images?.[0]?.url ||
+                house.images?.[0] ||
+                "https://via.placeholder.com/300";
+
+            const isSaved = house.isSaved || false;
+            const views = house.views || 0;
+
+            const card = document.createElement("div");
+            card.className = "dashboard-card";
+
+            card.innerHTML = `
+                <div class="card-image">
+                    <img src="${firstImage}" alt="${house.title}">
+                    
+                    <div class="card-overlay">
+                        <button class="edit-btn" data-id="${house._id}">✏️</button>
+                        <button class="save-btn ${isSaved ? 'saved' : ''}" data-id="${house._id}">
+                            ${isSaved ? '❤️' : '🤍'}
+                        </button>
+                    </div>
+
+                    <span class="status-badge ${house.status}">
+                        ${house.status || "available"}
+                    </span>
+                </div>
+
+                <div class="card-body">
+                    <h3>${house.title}</h3>
+                    <p class="location">📍 ${house.location}</p>
+                    <p class="price">KSh ${house.price}</p>
+
+                    <div class="card-stats">
+                        <span>👁️ ${views}</span>
+                        <span>⭐ ${house.favorites || 0}</span>
+                    </div>
+                </div>
+            `;
+
+            // 👉 OPEN LISTING
+            card.addEventListener("click", () => {
+                window.location.href = `/listing.html?id=${house._id}`;
+            });
+
+            // 👉 EDIT
+            card.querySelector(".edit-btn").addEventListener("click", (e) => {
+                e.stopPropagation();
+                window.location.href = `/edit-listing.html?id=${house._id}`;
+            });
+
+            // 👉 SAVE / FAVORITE
+            const saveBtn = card.querySelector(".save-btn");
+            saveBtn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+
+                try {
+                    const res = await fetch(`/api/houses/${house._id}/save`, {
+                        method: "POST",
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    const data = await res.json();
+
+                    // toggle UI instantly
+                    saveBtn.classList.toggle("saved");
+                    saveBtn.innerText = saveBtn.classList.contains("saved") ? "❤️" : "🤍";
+
+                } catch (err) {
+                    console.error("Save failed", err);
+                }
+            });
+
+            container.appendChild(card);
+        });
+
+    } catch (err) {
+        console.error("Error loading listings:", err);
+        container.innerHTML = "<p>Error loading listings.</p>";
+    }
+}
+
 loadProfile();
+loadMyListings();
+loadSavedListings().then(updateStats);// <-- add this
 
 // ================= PROFILE IMAGE UPLOAD =================
 const imageInput = document.getElementById('imageInput');
@@ -177,6 +320,78 @@ async function uploadDocument(file, type) {
     const data = await res.json();
     if (!data.url) throw new Error("Upload failed");
     return data.url;
+}
+
+
+async function loadSavedListings() {
+    const container = document.getElementById("savedGrid");
+    const countEl = document.getElementById("savedCount");
+    if (!container) return;
+
+    try {
+        const res = await fetch("/api/houses/saved", {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const savedHouses = await res.json();
+        countEl.innerText = savedHouses.length;
+
+        if (!savedHouses.length) {
+            container.innerHTML = "<p>No saved listings yet.</p>";
+            return;
+        }
+
+        container.innerHTML = "";
+        savedHouses.forEach(house => {
+            const card = document.createElement("div");
+            card.className = "dashboard-card";
+            const img = house.images?.[0] || "/images/default-house.png";
+            card.innerHTML = `
+                <div class="card-image">
+                    <img src="${img}" alt="${house.title}">
+                    <span class="status-badge ${house.status || 'available'}">
+                        ${house.status?.toUpperCase() || 'AVAILABLE'}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <h3>${house.title}</h3>
+                    <p>📍 ${house.location}</p>
+                    <p>KSh ${house.price}</p>
+                </div>
+            `;
+            card.addEventListener("click", () => {
+                window.location.href = `/listing.html?id=${house._id}`;
+            });
+            container.appendChild(card);
+        });
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = "<p>Error loading saved listings.</p>";
+    }
+}
+
+async function updateStats() {
+    const listingsCountEl = document.getElementById("listingsCount");
+    const savedCountEl = document.getElementById("savedCount");
+
+    try {
+        // Get listings count
+        const listingsRes = await fetch("/api/houses/my/listings", {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const listings = await listingsRes.json();
+        listingsCountEl.innerText = listings.length;
+
+        // Use already loaded saved listings in the DOM
+        const savedContainer = document.getElementById("savedGrid");
+        if (savedContainer) {
+            savedCountEl.innerText = savedContainer.children.length;
+        }
+
+    } catch (err) {
+        console.error("Failed to update stats:", err);
+        listingsCountEl.innerText = 0;
+        savedCountEl.innerText = 0;
+    }
 }
 
 // ================= VERIFY FORM =================

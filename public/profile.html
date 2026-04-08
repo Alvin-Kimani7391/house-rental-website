@@ -159,6 +159,65 @@
 
 .hidden { display: none; }
 
+/* ================= CONTACT INFO ================= */
+.profile-contact {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.contact-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #333;
+    transition: all 0.2s ease;
+}
+
+.contact-pill:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+/* icons */
+.contact-pill span {
+    font-size: 14px;
+}
+
+/* Save button */
+.save-btn {
+    border: none;
+    padding: 6px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    font-size: 16px;
+}
+
+.save-btn.saved {
+    background: #e84393;
+}
+
+/* Stats row */
+.card-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #555;
+}
+
+/* Slight hover animation */
+.save-btn:hover {
+    transform: scale(1.1);
+}
+
 </style>
 </head>
 <body>
@@ -208,7 +267,7 @@
     <div class="profile-info">
         <h2 id="profileName">User Name</h2>
         <div class="profile-meta" id="profileMeta">Email • Joined Year</div>
-
+        <div id="profileContact" class="profile-contact"></div>
         <div class="status-pill" id="status">Verification Pending</div>
 
         <p id="profileBio" style="margin-top:15px;">User bio goes here.</p>
