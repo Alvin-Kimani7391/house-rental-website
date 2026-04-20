@@ -13,22 +13,30 @@ const PORT = process.env.PORT || 5000;
 
 // ===== CORS =====
 const allowedOrigins = [
-  'https://housefinder-sigma.vercel.app/',
+  'https://housefinder-sigma.vercel.app',
   'http://localhost:3000'
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // allow requests with no origin (like mobile apps / curl)
+    if (!origin) return callback(null, true);
+
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') // allow all Vercel previews
+    ) {
+      return callback(null, true);
     }
+
+    return callback(new Error('Not allowed by CORS'));
   },
-  methods: ['GET','POST','PUT','DELETE'],
-  allowedHeaders: ['Content-Type','Authorization']
+  methods: ['GET','POST','PUT','PATCH','DELETE'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  credentials: true
 }));
 
+app.options('*', cors());
 // ===== BODY =====
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
