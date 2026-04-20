@@ -151,4 +151,36 @@ router.post('/verify', protect, async (req, res) => {
     }
 });
 
+
+/* ================= TEST SINGLE DOCUMENT UPLOAD ================= */
+router.post('/verify-test', protect, async (req, res) => {
+    try {
+        console.log("REQ BODY:", req.body);
+
+        const { nationalId } = req.body; // test one doc at a time
+        if (!nationalId) return res.status(400).json({ message: "No nationalId sent" });
+
+        const user = req.user;
+
+        // Update only nationalId
+        user.verification = {
+            status: 'pending',
+            documents: {
+                nationalId: nationalId
+            }
+        };
+
+        console.log("USER VERIFICATION BEFORE SAVE:", user.verification);
+
+        await user.save();
+
+        console.log("USER VERIFICATION AFTER SAVE:", user.verification);
+
+        res.json({ message: 'Test verification saved', verification: user.verification });
+    } catch (err) {
+        console.error("Test upload error:", err);
+        res.status(500).json({ message: 'Test upload failed', error: err.message });
+    }
+});
+
 module.exports = router;

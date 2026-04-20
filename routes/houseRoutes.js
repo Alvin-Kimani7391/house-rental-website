@@ -165,13 +165,13 @@ router.get('/:id', async (req, res) => {
     }
 
     const isSaved = userId
-      ? house.favorites.some(fav => fav.toString() === userId)
+      ? house.favorites?.some(fav => fav.toString() === userId)
       : false;
 
     res.json({
   ...house.toObject(),
   isSaved,
-  favoritesCount: house.favorites.length
+  favoritesCount: house.favorites?.length || 0
 });
 
   } catch (err) {
@@ -211,7 +211,7 @@ router.post('/:id/save', protect, async (req, res) => {
     const userId = req.user._id;
     if (!house.favorites) house.favorites = [];
 
-    const alreadySaved = house.favorites.some(
+    const alreadySaved = house.favorites?.some(
   id => id.toString() === userId.toString()
 );
     if (alreadySaved) {
