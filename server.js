@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 // ===== CORS =====
 const allowedOrigins = [
-  'https://your-frontend.vercel.app',
+  'https://housefinder-sigma.vercel.app/',
   'http://localhost:3000'
 ];
 
